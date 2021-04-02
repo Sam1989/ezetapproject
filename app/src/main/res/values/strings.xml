@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">EzetapProject</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="bad_response">Bad Response</string>
+    <string name="ok">OK</string>
+    <string name="no_network_connected">No Network Connected</string>
+    <string name="search">Search for restaurants cuisines</string>
+</resources>
