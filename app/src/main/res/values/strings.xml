@@ -4,5 +4,8 @@
     <string name="bad_response">Bad Response</string>
     <string name="ok">OK</string>
     <string name="no_network_connected">No Network Connected</string>
-    <string name="search">Search for restaurants cuisines</string>
+
+    <string name="text">Please enter value</string>
+    <string name="title_activity_main2">MainActivity2</string>
+
 </resources>

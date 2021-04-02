@@ -1,8 +1,6 @@
 package com.ds.ezetapproject.base
 
 import android.content.DialogInterface
-import com.ds.myapplication.model.MasterResponse
-import com.ds.myapplication.model.NearByRestResponse
 
 
 interface AsyncViewController {

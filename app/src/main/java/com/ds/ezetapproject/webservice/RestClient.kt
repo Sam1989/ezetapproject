@@ -5,11 +5,10 @@ import android.net.ConnectivityManager
 import androidx.lifecycle.MutableLiveData
 import com.blankj.utilcode.util.ToastUtils
 import com.ds.ezetapproject.R
-
 import com.ds.ezetapproject.base.AsyncViewController
 import com.ds.ezetapproject.base.MainApplication
-import com.ds.myapplication.model.NearByLocationRequest
-import com.ds.myapplication.model.NearByRestResponse
+import com.ds.ezetapproject.model.DataResponse
+
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.intuit.sdp.BuildConfig
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class RestClient {
 
-    var requestNearByLocationRequest = NearByLocationRequest()
+
     private var apiInterface: ApiInterface?
     var asyncViewController: AsyncViewController? = null
     var apiResponseListener: ApiResponseListener? = null
@@ -39,7 +38,6 @@ class RestClient {
 
     init {
         apiInterface = getApiInterface()
-        requestNearByLocationRequest = NearByLocationRequest()
 
         gson = Gson()
 
@@ -162,12 +160,9 @@ class RestClient {
 
     fun callPclApi(
         type: String,
-        requestPojo: Any?,
         dataCarrier: MutableLiveData<*>?,
-        showProgressDialog: Boolean,
-        callType: String
+        showProgressDialog: Boolean
     ) {
-
         if (!passChecks()) {
             return
         }
@@ -179,21 +174,9 @@ class RestClient {
         when {
             apiRequestType.requestType === RequestType.GET -> {
                 when {
-                    apiRequestType.url.contains(ApiRegister.nearBySearchList) -> {
-
-                        if (callType != "Search") {
-                            requestNearByLocationRequest = requestPojo as NearByLocationRequest
-                            var url =
-                                apiRequestType.url + "?location=" + requestNearByLocationRequest.location + "&radius=" + requestNearByLocationRequest.radius + "&type=" +
-                                        requestNearByLocationRequest.type + "&key=" + requestNearByLocationRequest.key
-                            call = getApiInterface()!!.getApi(url)
-                        } else {
-                            requestNearByLocationRequest = requestPojo as NearByLocationRequest
-                            var url =
-                                apiRequestType.url + "?location=" + requestNearByLocationRequest.location + "&radius=" + requestNearByLocationRequest.radius + "&type=" +
-                                        requestNearByLocationRequest.type + "&keyword=:" + requestNearByLocationRequest.keyword + "&key=" + requestNearByLocationRequest.key
-                            call = getApiInterface()!!.getApi(url)
-                        }
+                    apiRequestType.url.contains(ApiRegister.fetchCustomUI) -> {
+                        var url = apiRequestType.url
+                        call = getApiInterface()!!.getApi(url)
                     }
                 }
             }
@@ -214,8 +197,7 @@ class RestClient {
                     val responseString: String
                     try {
                         responseString = responseBody.string()
-
-                        var master = NearByRestResponse()
+                        var master = DataResponse()
                         try {
                             master = gson.fromJson(responseString, apiRequestType.responseType)
                             dataCarrier?.value = master
@@ -227,26 +209,13 @@ class RestClient {
                         e.printStackTrace()
                     }
                 } else {
-
                     var wrapperApiError: WrapperApiError? = null
                     val errBody = response.errorBody()
                     if (errBody != null) {
-                        wrapperApiError = try {
-                            val errBodyStr = errBody.string()
-
-                            val errInPojo: NearByRestResponse = //MasterResponse<Any>
-                                gson.fromJson(errBodyStr, apiRequestType.responseType)
-
-                            WrapperApiError(type, errInPojo.status.toString())
-
-                        } catch (e: java.lang.Exception) {
-                            e.printStackTrace()
-                            WrapperApiError(
-                                type,
-                                "Not",
-                                MainApplication.get().getString(R.string.something_went_wrong)
-                            )
-                        }
+                        wrapperApiError = WrapperApiError(
+                            type,
+                            MainApplication.get().getString(R.string.something_went_wrong)
+                        )
                     }
                     dispatchError(wrapperApiError!!)
                 }
@@ -266,7 +235,6 @@ class RestClient {
     private fun dispatchError(apiErr: WrapperApiError) {
 
         var result = apiErr.msg
-
         if (apiErr.msg.equals("validation error", true)) {
             result += ":\n"
             apiErr.validationErr.forEach {
